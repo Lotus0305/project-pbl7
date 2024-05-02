@@ -4,8 +4,8 @@ const ComicController = {
   getComics: async (req, res) => {
     try {
       const comics = await Comic.find()
-        .populate("author", '_id name')
-        .populate("categories", '_id name');
+        .populate("author", "_id name")
+        .populate("categories", "_id name");
       res.json(comics);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -15,8 +15,8 @@ const ComicController = {
   getComic: async (req, res) => {
     try {
       const comic = await Comic.findById(req.params.id)
-        .populate("author", '_id name')
-        .populate("categories", '_id name');
+        .populate("author", "_id name")
+        .populate("categories", "_id name");
       res.json(comic);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -50,7 +50,7 @@ const ComicController = {
 
   updateComic: async (req, res) => {
     try {
-      const validateError = await validateComicData(req, res);
+      const validateError = await this.validateComicData(req, res);
       if (validateError) {
         return validateError;
       }
@@ -74,23 +74,22 @@ const ComicController = {
       res.status(400).json({ message: err.message });
     }
   },
+
+  async validateComicData(req, res){
+    const author = await Author.findById(req.body.author);
+    if (!author) {
+      return res.status(404).json({ message: "Author not found" });
+    }
+    const categories = await Category.find({
+      _id: { $in: req.body.categories },
+    });
+    if (categories.length !== req.body.categories.length) {
+      return res
+        .status(404)
+        .json({ message: "One or more categories not found" });
+    }
+    return null;
+  },
 };
-
-async function validateComicData(req, res) {
-  const author = await Author.findById(req.body.author);
-  if (!author) {
-    return res.status(404).json({ message: "Author not found" });
-  }
-
-  const categories = await Category.find({
-    _id: { $in: req.body.categories },
-  });
-  if (categories.length !== req.body.categories.length) {
-    return res
-      .status(404)
-      .json({ message: "One or more categories not found" });
-  }
-  return null;
-}
 
 module.exports = ComicController;

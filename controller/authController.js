@@ -1,6 +1,10 @@
 const bcrypt = require("bcrypt");
 const Account = require("../model/account");
 const Role = require("../model/role");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const authController = {
   register: async (req, res) => {
@@ -8,13 +12,13 @@ const authController = {
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash(req.body.password, salt);
 
-      const roleUser = await Role.findOne({ name: "user" });
+      const roleCustomer = await Role.findOne({ name: "customer" });
 
       const account = await Account.create({
         username: req.body.username,
         password: hash,
         email: req.body.email,
-        role: roleUser,
+        role: roleCustomer,
       });
       res.status(200).json(account);
     } catch (error) {
@@ -35,11 +39,75 @@ const authController = {
       if (!validPassword) {
         return res.status(400).json({ message: "Invalid password" });
       } else {
-        res.status(200).json(account);
+        const accessToken = authController.generateAccessToken(account);
+        const refreshToken = authController.generateRefreshToken(account);
+
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: false, // set true if using https
+          path: "/",
+          sameSite: "strict",
+        });
+        res.status(200).json({ accessToken });
       }
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
+  },
+
+  refreshToken: async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, (err, account) => {
+        if (err) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+        const accessToken = authController.generateAccessToken(account);
+        const refreshToken = authController.generateRefreshToken(account);
+
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: false, // set true if using https
+          path: "/",
+          sameSite: "strict",
+        });
+        res.status(200).json({ accessToken });
+      });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
+  logout: async (req, res) => {
+    res.clearCookie("refreshToken");
+    res.status(200).json({ message: "Logout success" });
+  },
+
+  generateAccessToken: (account) => {
+    const accessToken = jwt.sign(
+      {
+        id: account.id,
+        role: account.role.name,
+      },
+      process.env.JWT_ACCESS_KEY,
+      { expiresIn: "5m" }
+    );
+    return accessToken;
+  },
+
+  generateRefreshToken: (account) => {
+    const accessToken = jwt.sign(
+      {
+        id: account.id,
+        role: account.role.name,
+      },
+      process.env.JWT_REFRESH_KEY,
+      { expiresIn: "30d" }
+    );
+    return accessToken;
   },
 };
 

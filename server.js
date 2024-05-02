@@ -12,10 +12,10 @@ const comicRouter = require("./routes/comicRoute");
 const authRouter = require("./routes/authRoute");
 const accountRouter = require("./routes/accountRoute");
 
+dotenv.config();
 const app = express();
 const port = process.env.PORT || 8000;
 
-dotenv.config();
 mongoose.connect(
   process.env.MONGODB_URL
 );
