@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const Account = require("../model/account");
 const Role = require("../model/role");
 const jwt = require("jsonwebtoken");
