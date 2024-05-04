@@ -40,3 +40,7 @@ app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/comic", comicRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
+
+app.use("", (req, res) => {
+  res.send("Hello World");
+});
