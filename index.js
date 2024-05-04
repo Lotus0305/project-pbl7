@@ -20,6 +20,9 @@ const port = process.env.PORT || 8000;
 mongoose.connect(
   process.env.MONGODB_URL
 );
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferMaxEntries', 0);
+
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
