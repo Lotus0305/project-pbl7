@@ -18,7 +18,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 mongoose.connect(
-  'mongodb+srv://tienhungg0305:hYm142Jn4lXrC80r@cluster0.clbzefl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+  process.env.MONGODB_URL
 );
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -41,4 +41,4 @@ app.use("/api/v1/comic", comicRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 
-app.get("/", (req, res) => res.send("Express on Vercel v2.0.0"));
+app.get("/", (req, res) => res.send("Express on Vercel"));
