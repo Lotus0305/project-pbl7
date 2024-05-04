@@ -18,7 +18,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 mongoose.connect(
-  process.env.MONGODB_URL
+  'mongodb+srv://tienhungg0305:hYm142Jn4lXrC80r@cluster0.clbzefl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 );
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
