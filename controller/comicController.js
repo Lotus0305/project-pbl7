@@ -14,9 +14,11 @@ const ComicController = {
 
   getComic: async (req, res) => {
     try {
-      const comic = await Comic.findById(req.params.id)
-        .populate("author", "_id name")
-        .populate("categories", "_id name");
+      const comic = await Comic.findById(req.params.id);
+      if (!comic) {
+        return res.status(404).json({ message: "Comic not found" });
+      }
+      comic = comic.populate("author", "_id name").populate("categories", "_id name");
       res.json(comic);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -25,9 +27,9 @@ const ComicController = {
 
   addComic: async (req, res) => {
     try {
-      const validateError = await validateComicData(req, res);
-      if (validateError) {
-        return validateError;
+      const validateerr = await validateComicData(req, res);
+      if (validateerr) {
+        return validateerr;
       }
       const comic = new Comic(req.body);
       const newComic = await comic.save();
@@ -50,9 +52,13 @@ const ComicController = {
 
   updateComic: async (req, res) => {
     try {
-      const validateError = await this.validateComicData(req, res);
-      if (validateError) {
-        return validateError;
+      const comic = await Comic.findById(req.params.id);
+      if (!comic) {
+        return res.status(404).json({ message: "Comic not found" });
+      }
+      const validateerr = await this.validateComicData(req, res);
+      if (validateerr) {
+        return validateerr;
       }
 
       const updatedComic = await Comic.findByIdAndUpdate(
@@ -68,6 +74,10 @@ const ComicController = {
 
   deleteComic: async (req, res) => {
     try {
+      const comic = await Comic.findById(req.params.id);
+      if (!comic) {
+        return res.status(404).json({ message: "Comic not found" });
+      }
       await Comic.findByIdAndDelete(req.params.id);
       res.status(202).json({ message: "Comic has been deleted" });
     } catch (err) {
@@ -75,7 +85,7 @@ const ComicController = {
     }
   },
 
-  async validateComicData(req, res){
+  async validateComicData(req, res) {
     const author = await Author.findById(req.body.author);
     if (!author) {
       return res.status(404).json({ message: "Author not found" });

@@ -11,9 +11,7 @@ const authController = {
     try {
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash(req.body.password, salt);
-
       const roleCustomer = await Role.findOne({ name: "customer" });
-
       const account = await Account.create({
         username: req.body.username,
         password: hash,
@@ -21,8 +19,8 @@ const authController = {
         role: roleCustomer,
       });
       res.status(200).json(account);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
     }
   },
 
@@ -50,8 +48,8 @@ const authController = {
         });
         res.status(200).json({ accessToken });
       }
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
     }
   },
 
@@ -76,8 +74,8 @@ const authController = {
         });
         res.status(200).json({ accessToken });
       });
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
     }
   },
 
