@@ -3,8 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./config/swagger");
+
 
 const authorRouter = require("./routes/authorRoute");
 const categoryRouter = require("./routes/categoryRoute");
@@ -34,7 +33,6 @@ app.listen(port, () => {
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cors());
 app.use(morgan("common"));
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/v1/author", authorRouter);
 app.use("/api/v1/category", categoryRouter);
@@ -43,8 +41,20 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/csv", csvRouter);
+app.get("/", (req, res) => res.send("Express"));
 
-
-
-app.get("/", (req, res) => res.send("Express on Vercel"));
+const swaggerJsdoc = require('swagger-jsdoc');
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Express API with Swagger',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./routes/*.js'], // files containing annotations as above
+};
+const specs = swaggerJsdoc(options);
+const swaggerUi = require('swagger-ui-express');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
