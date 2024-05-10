@@ -49,4 +49,4 @@ novelSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = mongoose.model("novel", novelSchema);
+module.exports = mongoose.model("Novel", novelSchema);
