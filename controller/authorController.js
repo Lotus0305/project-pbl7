@@ -3,8 +3,29 @@ const Author = require("../model/author");
 const AuthorController = {
   getAuthors: async (req, res) => {
     try {
-      const authors = await Author.find();
-      res.status(200).json(authors);
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+      const sortField = req.query.sortField || null;
+      const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
+  
+      const skip = (page - 1) * pageSize;
+      let sortObject = {};
+      if (sortField) {
+        sortObject[sortField] = sortOrder;
+      }
+  
+      const authors = await Author.find()
+        .skip(skip)
+        .limit(pageSize)
+        .sort(sortObject);
+  
+      const total = await Author.countDocuments();
+  
+      res.json({
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+        authors
+      });
     } catch (err) {
       res.status(400).json({ message: err.message });
     }

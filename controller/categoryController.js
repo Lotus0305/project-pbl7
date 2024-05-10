@@ -1,10 +1,31 @@
-const  Category  = require("../model/category");
+const Category = require("../model/category");
 
 const CategoryController = {
   getCategories: async (req, res) => {
     try {
-      const categories = await Category.find();
-      res.status(200).json(categories);
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+      const sortField = req.query.sortField || null;
+      const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+
+      const skip = (page - 1) * pageSize;
+      let sortObject = {};
+      if (sortField) {
+        sortObject[sortField] = sortOrder;
+      }
+
+      const categories = await Category.find()
+        .skip(skip)
+        .limit(pageSize)
+        .sort(sortObject);
+
+      const total = await Category.countDocuments();
+
+      res.json({
+        totalPages: Math.ceil(total / pageSize),
+        currentPage: page,
+        categories,
+      });
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -35,11 +56,12 @@ const CategoryController = {
 
   updateCategory: async (req, res) => {
     try {
+      // Check if category exists
       const category = await Category.findById(req.params.id);
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
       }
-
+      // Update category
       const updateCategory = await Category.findByIdAndUpdate(
         req.params.id,
         { $set: req.body },
