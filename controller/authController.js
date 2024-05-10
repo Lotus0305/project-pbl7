@@ -15,10 +15,14 @@ const authController = {
       const account = await Account.create({
         username: req.body.username,
         password: hash,
+        name: req.body.name,
         email: req.body.email,
         role: roleCustomer,
       });
-      res.status(200).json(account);
+      const accountRes = await Account.findById(account._id)
+        .select("-password")
+        .populate("role", "_id name");
+      res.status(200).json(accountRes);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }

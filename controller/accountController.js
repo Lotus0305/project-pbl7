@@ -1,5 +1,7 @@
 const Account = require("../model/account");
 const Role = require("../model/role");
+const bcrypt = require("bcryptjs");
+
 
 const accountController = {
   getAccounts: async (req, res) => {
@@ -57,13 +59,14 @@ const accountController = {
       const account = await Account.create({
         username: req.body.username,
         password: hash,
+        name: req.body.name,
         email: req.body.email,
         role: role,
       });
-      account = await Account.findById(account._id)
+      const accountRes = await Account.findById(account._id)
         .select("-password")
         .populate("role", "_id name");
-      res.status(200).json(account);
+      res.status(200).json(accountRes);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }

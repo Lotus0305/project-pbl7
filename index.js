@@ -43,18 +43,3 @@ app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/csv", csvRouter);
 app.get("/", (req, res) => res.send("Express"));
 
-const swaggerJsdoc = require('swagger-jsdoc');
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Express API with Swagger',
-      version: '1.0.0',
-    },
-  },
-  apis: ['./routes/*.js'], // files containing annotations as above
-};
-const specs = swaggerJsdoc(options);
-const swaggerUi = require('swagger-ui-express');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
