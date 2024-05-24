@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "swagger-autogen": "node ./config/swagger.js",
-    "swagger-and-start": "npm run swagger-autogen && npm start"
+    "dev": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -21,9 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.3.0",
     "morgan": "^1.10.0",
-    "swagger-autogen": "^2.23.7",
-    "swagger-jsdoc": "^5.0.1",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-jsdoc": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

@@ -4,9 +4,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
-const fs = require('fs');
-const swaggerUi = require('swagger-ui-express');
-const path = require('path');
 
 const authorRouter = require("./routes/authorRoute");
 const categoryRouter = require("./routes/categoryRoute");
@@ -43,17 +40,6 @@ app.use("/api/v1/import", importRouter);
 app.use("/api/v1/history", historyRouter);
 
 app.get("/", (req, res) => res.send("Express"));
-
-// Kiểm tra sự tồn tại của file swagger_output.json
-const swaggerFilePath = path.resolve(__dirname, './config/swagger_output.json');
-if (fs.existsSync(swaggerFilePath)) {
-  const swaggerFile = require(swaggerFilePath);
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
-  console.log("Swagger documentation is available at /api-docs");
-} else {
-  console.log("Swagger file not found. Please run `npm run swagger-autogen` first.");
-}
-
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
