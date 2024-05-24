@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const novelController = require("../controller/novelController");
+const novelController = require("../controllers/novelController");
 
 router.get("/", novelController.getNovels);
 router.get("/:id", novelController.getNovel);

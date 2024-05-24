@@ -1,4 +1,4 @@
-const Category = require("../model/category");
+const categoryService = require("../services/categoryService");
 
 const CategoryController = {
   getCategories: async (req, res) => {
@@ -8,24 +8,8 @@ const CategoryController = {
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
 
-      const skip = (page - 1) * pageSize;
-      let sortObject = {};
-      if (sortField) {
-        sortObject[sortField] = sortOrder;
-      }
-
-      const categories = await Category.find()
-        .skip(skip)
-        .limit(pageSize)
-        .sort(sortObject);
-
-      const total = await Category.countDocuments();
-
-      res.json({
-        totalPages: Math.ceil(total / pageSize),
-        currentPage: page,
-        categories,
-      });
+      const result = await categoryService.getCategories(page, pageSize, sortField, sortOrder);
+      res.json(result);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -33,7 +17,7 @@ const CategoryController = {
 
   getCategory: async (req, res) => {
     try {
-      const category = await Category.findById(req.params.id);
+      const category = await categoryService.getCategory(req.params.id);
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
       }
@@ -46,9 +30,8 @@ const CategoryController = {
 
   addCategory: async (req, res) => {
     try {
-      const category = new Category(req.body);
-      const saveCategory = await category.save();
-      res.status(200).json(saveCategory);
+      const savedCategory = await categoryService.addCategory(req.body);
+      res.status(200).json(savedCategory);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -56,18 +39,11 @@ const CategoryController = {
 
   updateCategory: async (req, res) => {
     try {
-      // Check if category exists
-      const category = await Category.findById(req.params.id);
-      if (!category) {
+      const updatedCategory = await categoryService.updateCategory(req.params.id, req.body);
+      if (!updatedCategory) {
         return res.status(404).json({ message: "Category not found" });
       }
-      // Update category
-      const updateCategory = await Category.findByIdAndUpdate(
-        req.params.id,
-        { $set: req.body },
-        { new: true }
-      );
-      res.status(200).json(updateCategory);
+      res.status(200).json(updatedCategory);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -75,12 +51,11 @@ const CategoryController = {
 
   deleteCategory: async (req, res) => {
     try {
-      const category = await Category.findById(req.params.id);
+      const category = await categoryService.getCategory(req.params.id);
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
       }
-
-      await Category.findByIdAndDelete(req.params.id);
+      await categoryService.deleteCategory(req.params.id);
       res.status(202).json({ message: "Category has been deleted" });
     } catch (err) {
       res.status(400).json({ message: err.message });

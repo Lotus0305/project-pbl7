@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const authorController = require("../controller/authorController");
+const authorController = require("../controllers/authorController");
 
 router.get("/", authorController.getAuthors);
 router.get("/:id", authorController.getAuthor);

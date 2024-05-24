@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const importController = require("../controller/importController");
+const importController = require("../controllers/importController");
 
 router.post("/import-account", importController.importAccount);
 router.post("/import-novel", importController.importNovel);

@@ -1,4 +1,4 @@
-const Author = require("../model/author");
+const authorService = require("../services/authorService");
 
 const AuthorController = {
   getAuthors: async (req, res) => {
@@ -7,25 +7,9 @@ const AuthorController = {
       const pageSize = parseInt(req.query.pageSize) || 10;
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
-  
-      const skip = (page - 1) * pageSize;
-      let sortObject = {};
-      if (sortField) {
-        sortObject[sortField] = sortOrder;
-      }
-  
-      const authors = await Author.find()
-        .skip(skip)
-        .limit(pageSize)
-        .sort(sortObject);
-  
-      const total = await Author.countDocuments();
-  
-      res.json({
-        totalPages: Math.ceil(total / pageSize),
-        currentPage: page,
-        authors
-      });
+
+      const result = await authorService.getAuthors(page, pageSize, sortField, sortOrder);
+      res.json(result);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -33,7 +17,7 @@ const AuthorController = {
 
   getAuthor: async (req, res) => {
     try {
-      const author = await Author.findById(req.params.id);
+      const author = await authorService.getAuthor(req.params.id);
       if (!author) {
         return res.status(404).json({ message: "Author not found" });
       }
@@ -46,9 +30,8 @@ const AuthorController = {
 
   addAuthor: async (req, res) => {
     try {
-      const author = new Author(req.body);
-      const saveAuthor = await author.save();
-      res.status(200).json(saveAuthor);
+      const savedAuthor = await authorService.addAuthor(req.body);
+      res.status(200).json(savedAuthor);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -56,17 +39,11 @@ const AuthorController = {
 
   updateAuthor: async (req, res) => {
     try {
-      const author = await Author.findById(req.params.id);
-      if (!author) {
+      const updatedAuthor = await authorService.updateAuthor(req.params.id, req.body);
+      if (!updatedAuthor) {
         return res.status(404).json({ message: "Author not found" });
       }
-
-      const updateAuthor = await Author.findByIdAndUpdate(
-        req.params.id,
-        { $set: req.body },
-        { new: true }
-      );
-      res.status(200).json(updateAuthor);
+      res.status(200).json(updatedAuthor);
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
@@ -74,12 +51,11 @@ const AuthorController = {
 
   deleteAuthor: async (req, res) => {
     try {
-      const author = await Author.findById(req.params.id);
+      const author = await authorService.getAuthor(req.params.id);
       if (!author) {
         return res.status(404).json({ message: "Author not found" });
       }
-    
-      await Author.findByIdAndDelete(req.params.id);
+      await authorService.deleteAuthor(req.params.id);
       res.status(200).json({ message: "Author has been deleted" });
     } catch (err) {
       res.status(400).json({ message: err.message });

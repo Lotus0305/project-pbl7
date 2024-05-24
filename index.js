@@ -12,6 +12,7 @@ const authRouter = require("./routes/authRoute");
 const accountRouter = require("./routes/accountRoute");
 const commentRouter = require("./routes/commentRoute");
 const importRouter = require("./routes/importRoute");
+const historyRouter = require("./routes/historyRoute");
 var bodyParser = require("body-parser");
 
 dotenv.config();
@@ -40,5 +41,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/import", importRouter);
+app.use("/api/v1/history", historyRouter);
+
 app.get("/", (req, res) => res.send("Express"));
 
