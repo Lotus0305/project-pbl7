@@ -9,22 +9,31 @@ const NovelController = {
       const pageSize = parseInt(req.query.pageSize) || 10;
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
-
+      const categoryId = req.query.categoryId || null;
+      const authorId = req.query.authorId || null;
+  
       const skip = (page - 1) * pageSize;
       let sortObject = {};
       if (sortField) {
         sortObject[sortField] = sortOrder;
       }
-
-      const novels = await Novel.find()
+  
+      let filterObject = {};
+      if (categoryId) {
+        filterObject.category = categoryId;
+      }
+      if (authorId) {
+        filterObject.author = authorId;
+      }
+  
+      const novels = await Novel.find(filterObject)
         .populate("author", "_id name")
         .populate("category", "_id name")
         .skip(skip)
         .limit(pageSize)
         .sort(sortObject);
-
-      const total = await Novel.countDocuments();
-
+      const total = await Novel.countDocuments(filterObject);
+  
       res.json({
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
@@ -34,6 +43,7 @@ const NovelController = {
       res.status(400).json({ message: err.message });
     }
   },
+  
 
   getNovel: async (req, res) => {
     try {

@@ -11,8 +11,7 @@ const novelRouter = require("./routes/novelRoute");
 const authRouter = require("./routes/authRoute");
 const accountRouter = require("./routes/accountRoute");
 const commentRouter = require("./routes/commentRoute");
-
-const csvRouter = require("./routes/csvRouter");
+const importRouter = require("./routes/importRoute");
 var bodyParser = require("body-parser");
 
 dotenv.config();
@@ -40,6 +39,6 @@ app.use("/api/v1/novel", novelRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/comment", commentRouter);
-app.use("/api/v1/csv", csvRouter);
+app.use("/api/v1/import", importRouter);
 app.get("/", (req, res) => res.send("Express"));
 
