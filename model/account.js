@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const accountSchema = new mongoose.Schema(
   {
-    _id: mongoose.Schema.Types.Number,
+    _id: mongoose.Schema.Types.String,
     username: {
       type: String,
       required: true,
@@ -22,7 +22,7 @@ const accountSchema = new mongoose.Schema(
       unique: true,
     },
     role: {
-      type: mongoose.Schema.Types.Number,
+      type: mongoose.Schema.Types.String,
       ref: "Role",
       required: true,
     },
@@ -34,9 +34,10 @@ const accountSchema = new mongoose.Schema(
 accountSchema.pre("save", async function (next) {
   if (this.isNew) {
     if (!this._id) {
-      const lastFind = await this.constructor.findOne().sort("-_id");
-      const id = lastFind ? lastFind._id : 0;
-      this._id = id + Date.now() + Math.floor(Math.random() * 10000);
+      const timestamp = Date.now().toString();
+      const randomNum = Math.floor(Math.random() * 10000).toString();
+      const id = timestamp + randomNum;
+      this._id = "0" + id.toString();
     }
   }
   next();

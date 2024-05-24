@@ -31,7 +31,7 @@ const commentController = {
         comments,
       });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(400).json({ message: error.message });
     }
   },
 
@@ -46,7 +46,7 @@ const commentController = {
       }
       res.json(comment);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(400).json({ message: error.message });
     }
   },
 
@@ -62,7 +62,7 @@ const commentController = {
       await comment.save();
       res.json(comment);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(400).json({ message: error.message });
     }
   },
 
@@ -77,7 +77,7 @@ const commentController = {
       await comment.save();
       res.json(comment);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(400).json({ message: error.message });
     }
   },
 
@@ -91,7 +91,7 @@ const commentController = {
       await comment.remove();
       res.json(comment);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(400).json({ message: error.message });
     }
   },
 
@@ -107,7 +107,6 @@ const commentController = {
     if (!novel) {
       return res.status(404).json({ message: "Novel not found" });
     }
-
     next();
   },
 };
