@@ -1,69 +1,75 @@
-const commentService = require("../services/commentService");
+const Comment = require("../models/comment");
 
-const commentController = {
-  getComments: async (req, res) => {
-    try {
-      const page = parseInt(req.query.page) || 1;
-      const pageSize = parseInt(req.query.pageSize) || 10;
-      const sortField = req.query.sortField || null;
-      const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
-
-      const result = await commentService.getComments(page, pageSize, sortField, sortOrder);
-      res.json(result);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+const commentService = {
+  getComments: async (
+    page,
+    pageSize,
+    sortField,
+    sortOrder,
+    novelId,
+    accountId
+  ) => {
+    const skip = (page - 1) * pageSize;
+    const filterObject = {};
+    if (novelId) {
+      filterObject.novel = novelId;
     }
+    if (accountId) {
+      filterObject.account = accountId;
+    }
+
+    const comments = await Comment.find(filterObject)
+      .populate("novel", "_id name")
+      .populate("account", "_id username");
+
+    const nonEmptyComments = comments.filter(
+      (comment) =>
+        comment[sortField] !== "" &&
+        comment[sortField] !== null &&
+        comment[sortField] !== undefined
+    );
+    const emptyComments = comments.filter(
+      (comment) =>
+        comment[sortField] === "" ||
+        comment[sortField] === null ||
+        comment[sortField] === undefined
+    );
+
+    nonEmptyComments.sort((a, b) => {
+      if (a[sortField] < b[sortField]) return sortOrder === "desc" ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === "desc" ? -1 : 1;
+      return 0;
+    });
+
+    const processedComments = nonEmptyComments.concat(emptyComments);
+    const paginatedComments = processedComments.slice(skip, skip + pageSize);
+    const total = await Comment.countDocuments(filterObject);
+
+    return {
+      totalPages: Math.ceil(total / pageSize),
+      currentPage: page,
+      comments: paginatedComments,
+    };
   },
 
-  getComment: async (req, res) => {
-    try {
-      const comment = await commentService.getComment(req.params.id);
-      if (!comment) {
-        res.status(404).json({ message: "Comment not found" });
-        return;
-      }
-      res.json(comment);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+  getComment: async (id) => {
+    return await Comment.findById(id)
+      .populate("novel", "_id name")
+      .populate("account", "_id username");
   },
 
-  addComment: async (req, res) => {
-    try {
-      await commentService.validateCommentData(req.body.accountId, req.body.novelId);
-      const comment = await commentService.addComment(req.body);
-      res.json(comment);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+  addComment: async (commentData) => {
+    const comment = new Comment(commentData);
+    return await comment.save();
   },
 
-  updateComment: async (req, res) => {
-    try {
-      const comment = await commentService.updateComment(req.params.id, req.body);
-      res.json(comment);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+  updateComment: async (id, commentData) => {
+    return await Comment.findByIdAndUpdate(id, commentData, { new: true });
   },
 
-  deleteComment: async (req, res) => {
-    try {
-      const comment = await commentService.deleteComment(req.params.id);
-      res.json(comment);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-
-  validateCommentData: async (req, res, next) => {
-    try {
-      await commentService.validateCommentData(req.body.accountId, req.body.novelId);
-      next();
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+  deleteComment: async (id) => {
+    return await Comment.findByIdAndDelete(id);
   },
 };
 
-module.exports = commentController;
+module.exports = commentService;

@@ -30,7 +30,7 @@ const middlewareController = {
         res.status(403).json("You are not authorized!");
       }
     };
-  }
+  },
 };
 
 module.exports = middlewareController;

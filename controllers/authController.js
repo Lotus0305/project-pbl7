@@ -13,7 +13,10 @@ const authController = {
   login: async (req, res) => {
     try {
       const { username, password } = req.body;
-      const { accessToken, refreshToken } = await authService.login(username, password);
+      const { accessToken, refreshToken } = await authService.login(
+        username,
+        password
+      );
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,

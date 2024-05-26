@@ -3,25 +3,39 @@ const Account = require("../models/account");
 const Novel = require("../models/novel");
 
 const historyService = {
-  getHistories: async (accountId, page, pageSize, sortField, sortOrder) => {
+  getHistories : async (accountId, page, pageSize, sortField, sortOrder) => {
     const skip = (page - 1) * pageSize;
-    let sortObject = {};
-    if (sortField) {
-      sortObject[sortField] = sortOrder === 'desc' ? -1 : 1;
-    }
-
-    const histories = await History.find({ account: accountId })
-      .skip(skip)
-      .limit(pageSize)
-      .sort(sortObject)
-      .populate("novel");
-
-    const total = await History.countDocuments({ account: accountId });
-
+    const filterObject = { account: accountId };
+  
+    const histories = await History.find(filterObject).populate("novel");
+  
+    const nonEmptyHistories = histories.filter(
+      (history) =>
+        history[sortField] !== "" &&
+        history[sortField] !== null &&
+        history[sortField] !== undefined
+    );
+    const emptyHistories = histories.filter(
+      (history) =>
+        history[sortField] === "" ||
+        history[sortField] === null ||
+        history[sortField] === undefined
+    );
+  
+    nonEmptyHistories.sort((a, b) => {
+      if (a[sortField] < b[sortField]) return sortOrder === "desc" ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === "desc" ? -1 : 1;
+      return 0;
+    });
+  
+    const processedHistories = nonEmptyHistories.concat(emptyHistories);
+    const paginatedHistories = processedHistories.slice(skip, skip + pageSize);
+    const total = await History.countDocuments(filterObject);
+  
     return {
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
-      histories,
+      histories: paginatedHistories,
     };
   },
 

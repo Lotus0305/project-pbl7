@@ -1,4 +1,3 @@
-// C:\Users\Tienh\Desktop\Code\PBL 7\recommender_system\sourceBE\index.js
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");

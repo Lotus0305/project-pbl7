@@ -3,14 +3,16 @@ const Author = require("../models/author");
 const Category = require("../models/category");
 
 const novelService = {
-  getNovels: async (page, pageSize, sortField, sortOrder, categoryId, authorId) => {
+  getNovels: async (
+    page,
+    pageSize,
+    sortField,
+    sortOrder,
+    categoryId,
+    authorId
+  ) => {
     const skip = (page - 1) * pageSize;
-    let sortObject = {};
-    if (sortField) {
-      sortObject[sortField] = sortOrder === "desc" ? -1 : 1;
-    }
-
-    let filterObject = {};
+    const filterObject = {};
     if (categoryId) {
       filterObject.category = categoryId;
     }
@@ -20,16 +22,35 @@ const novelService = {
 
     const novels = await Novel.find(filterObject)
       .populate("author", "_id name")
-      .populate("category", "_id name")
-      .skip(skip)
-      .limit(pageSize)
-      .sort(sortObject);
-    const total = await Novel.countDocuments(filterObject);
+      .populate("category", "_id name");
 
+    const nonEmptyNovels = novels.filter(
+      (novel) =>
+        novel[sortField] !== "" &&
+        novel[sortField] !== null &&
+        novel[sortField] !== undefined
+    );
+    const emptyNovels = novels.filter(
+      (novel) =>
+        novel[sortField] === "" ||
+        novel[sortField] === null ||
+        novel[sortField] === undefined
+    );
+
+    nonEmptyNovels.sort((a, b) => {
+      if (a[sortField] < b[sortField]) return sortOrder === -1 ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === -1 ? -1 : 1;
+      return 0;
+    });
+
+    const processedNovels = nonEmptyNovels.concat(emptyNovels);
+    const paginatedNovels = processedNovels.slice(skip, skip + pageSize);
+    const total = await Novel.countDocuments(filterObject);
+    
     return {
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
-      novels,
+      novels: paginatedNovels,
     };
   },
 
@@ -67,18 +88,6 @@ const novelService = {
     }
 
     await Novel.findByIdAndDelete(id);
-  },
-
-  validateNovelData: async (authorId, categoryId) => {
-    const author = await Author.findById(authorId);
-    if (!author) {
-      throw new Error("Author not found");
-    }
-
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      throw new Error("Category not found");
-    }
   },
 };
 

@@ -8,7 +8,12 @@ const accountController = {
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder || "asc";
 
-      const result = await accountService.getAccounts(page, pageSize, sortField, sortOrder);
+      const result = await accountService.getAccounts(
+        page,
+        pageSize,
+        sortField,
+        sortOrder
+      );
       res.json(result);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -38,7 +43,10 @@ const accountController = {
 
   updateAccount: async (req, res) => {
     try {
-      const account = await accountService.updateAccount(req.params.id, req.body);
+      const account = await accountService.updateAccount(
+        req.params.id,
+        req.body
+      );
       if (!account) {
         return res.status(404).json({ message: "Account not found" });
       }
@@ -61,18 +69,6 @@ const accountController = {
     }
   },
 
-  validateAccountData: async (req, res, next) => {
-    try {
-      const role = await accountService.validateAccountData(req.body.role);
-      if (!role) {
-        return res.status(404).json({ message: "Role not found" });
-      }
-      next();
-    } catch (err) {
-      res.status(400).json({ message: err.message });
-    }
-  },
-
   likeNovel: async (req, res) => {
     try {
       const { accountId, novelId } = req.params;
@@ -90,6 +86,33 @@ const accountController = {
       res.status(200).json({ message: "Novel unliked", likedNovels });
     } catch (err) {
       res.status(400).json({ message: err.message });
+    }
+  },
+
+  validateAccountData: async (req, res, next) => {
+    try {
+      const { username, email } = req.body;
+      const accountId = req.params.id;
+
+      // Check if username is already taken by another account
+      if (username) {
+        const existingUsername = await Account.findOne({ username });
+        if (existingUsername && existingUsername._id.toString() !== accountId) {
+          return res.status(400).json({ message: "Username already exists" });
+        }
+      }
+
+      // Check if email is already taken by another account
+      if (email) {
+        const existingEmail = await Account.findOne({ email });
+        if (existingEmail && existingEmail._id.toString() !== accountId) {
+          return res.status(400).json({ message: "Email already exists" });
+        }
+      }
+
+      next();
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
   },
 };

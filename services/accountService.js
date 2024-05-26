@@ -6,29 +6,45 @@ const bcrypt = require("bcryptjs");
 const accountService = {
   getAccounts: async (page, pageSize, sortField, sortOrder) => {
     const skip = (page - 1) * pageSize;
-    let sortObject = {};
-    if (sortField) {
-      sortObject[sortField] = sortOrder === "desc" ? -1 : 1;
-    }
 
     const accounts = await Account.find()
-      .skip(skip)
-      .limit(pageSize)
-      .sort(sortObject)
       .select("-password")
       .populate("role", "_id name");
 
+    const nonEmptyAccounts = accounts.filter(
+      (account) =>
+        account[sortField] !== "" &&
+        account[sortField] !== null &&
+        account[sortField] !== undefined
+    );
+    const emptyAccounts = accounts.filter(
+      (account) =>
+        account[sortField] === "" ||
+        account[sortField] === null ||
+        account[sortField] === undefined
+    );
+
+    nonEmptyAccounts.sort((a, b) => {
+      if (a[sortField] < b[sortField]) return sortOrder === "desc" ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === "desc" ? -1 : 1;
+      return 0;
+    });
+
+    const processedAccounts = nonEmptyAccounts.concat(emptyAccounts);
+    const paginatedAccounts = processedAccounts.slice(skip, skip + pageSize);
     const total = await Account.countDocuments();
 
     return {
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
-      accounts,
+      accounts: paginatedAccounts,
     };
   },
 
   getAccount: async (id) => {
-    const account = await Account.findById(id).select("-password").populate("role", "_id name");
+    const account = await Account.findById(id)
+      .select("-password")
+      .populate("role", "_id name");
     return account;
   },
 
@@ -43,12 +59,18 @@ const accountService = {
       email: accountData.email,
       role: role,
     });
-    const accountRes = await Account.findById(account._id).select("-password").populate("role", "_id name");
+    const accountRes = await Account.findById(account._id)
+      .select("-password")
+      .populate("role", "_id name");
     return accountRes;
   },
 
   updateAccount: async (id, accountData) => {
-    const account = await Account.findByIdAndUpdate(id, { $set: accountData }, { new: true })
+    const account = await Account.findByIdAndUpdate(
+      id,
+      { $set: accountData },
+      { new: true }
+    )
       .select("-password")
       .populate("role", "_id name");
     return account;
@@ -56,11 +78,6 @@ const accountService = {
 
   deleteAccount: async (id) => {
     await Account.findByIdAndDelete(id);
-  },
-
-  validateAccountData: async (roleName) => {
-    const role = await Role.findOne({ name: roleName });
-    return role;
   },
 
   likeNovel: async (accountId, novelId) => {

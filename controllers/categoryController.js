@@ -8,7 +8,12 @@ const CategoryController = {
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
 
-      const result = await categoryService.getCategories(page, pageSize, sortField, sortOrder);
+      const result = await categoryService.getCategories(
+        page,
+        pageSize,
+        sortField,
+        sortOrder
+      );
       res.json(result);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -39,7 +44,10 @@ const CategoryController = {
 
   updateCategory: async (req, res) => {
     try {
-      const updatedCategory = await categoryService.updateCategory(req.params.id, req.body);
+      const updatedCategory = await categoryService.updateCategory(
+        req.params.id,
+        req.body
+      );
       if (!updatedCategory) {
         return res.status(404).json({ message: "Category not found" });
       }
@@ -59,6 +67,30 @@ const CategoryController = {
       res.status(202).json({ message: "Category has been deleted" });
     } catch (err) {
       res.status(400).json({ message: err.message });
+    }
+  },
+
+  validateCategoryData: async (req, res, next) => {
+    try {
+      const { name } = req.body;
+      const categoryId = req.params.id;
+
+      // Check if name is already taken by another category
+      if (name) {
+        const existingCategory = await Category.findOne({ name });
+        if (
+          existingCategory &&
+          existingCategory._id.toString() !== categoryId
+        ) {
+          return res
+            .status(400)
+            .json({ message: "Category name already exists" });
+        }
+      }
+
+      next();
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
   },
 };

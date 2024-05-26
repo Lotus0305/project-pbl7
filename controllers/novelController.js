@@ -10,7 +10,14 @@ const NovelController = {
       const categoryId = req.query.categoryId || null;
       const authorId = req.query.authorId || null;
 
-      const result = await novelService.getNovels(page, pageSize, sortField, sortOrder, categoryId, authorId);
+      const result = await novelService.getNovels(
+        page,
+        pageSize,
+        sortField,
+        sortOrder,
+        categoryId,
+        authorId
+      );
       res.json(result);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -40,7 +47,10 @@ const NovelController = {
 
   updateNovel: async (req, res) => {
     try {
-      const updatedNovel = await novelService.updateNovel(req.params.id, req.body);
+      const updatedNovel = await novelService.updateNovel(
+        req.params.id,
+        req.body
+      );
       res.status(200).json(updatedNovel);
     } catch (err) {
       res.status(400).json({ message: err.message });
@@ -58,10 +68,36 @@ const NovelController = {
 
   validateNovelData: async (req, res, next) => {
     try {
-      await novelService.validateNovelData(req.body.author, req.body.category);
+      const { name, author, category } = req.body;
+      const novelId = req.params.id;
+
+      // Check if name is already taken by another novel
+      if (name) {
+        const existingNovel = await Novel.findOne({ name });
+        if (existingNovel && existingNovel._id.toString() !== novelId) {
+          return res.status(400).json({ message: "Novel name already exists" });
+        }
+      }
+
+      // Check if author exists
+      if (author) {
+        const authorExists = await Author.findById(author);
+        if (!authorExists) {
+          return res.status(400).json({ message: "Author does not exist" });
+        }
+      }
+
+      // Check if category exists
+      if (category) {
+        const categoryExists = await Category.findById(category);
+        if (!categoryExists) {
+          return res.status(400).json({ message: "Category does not exist" });
+        }
+      }
+
       next();
-    } catch (err) {
-      res.status(400).json({ message: err.message });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
   },
 };

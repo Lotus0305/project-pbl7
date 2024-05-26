@@ -8,7 +8,12 @@ const commentController = {
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
 
-      const result = await commentService.getComments(page, pageSize, sortField, sortOrder);
+      const result = await commentService.getComments(
+        page,
+        pageSize,
+        sortField,
+        sortOrder
+      );
       res.json(result);
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -30,7 +35,6 @@ const commentController = {
 
   addComment: async (req, res) => {
     try {
-      await commentService.validateCommentData(req.body.accountId, req.body.novelId);
       const comment = await commentService.addComment(req.body);
       res.json(comment);
     } catch (error) {
@@ -40,7 +44,10 @@ const commentController = {
 
   updateComment: async (req, res) => {
     try {
-      const comment = await commentService.updateComment(req.params.id, req.body);
+      const comment = await commentService.updateComment(
+        req.params.id,
+        req.body
+      );
       res.json(comment);
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -58,7 +65,20 @@ const commentController = {
 
   validateCommentData: async (req, res, next) => {
     try {
-      await commentService.validateCommentData(req.body.accountId, req.body.novelId);
+      const { content, rating } = req.body;
+
+      // Check if content is not empty
+      if (!content || content.length < 1) {
+        return res.status(400).json({ message: "Content cannot be empty" });
+      }
+
+      // Check if rating is between 1 and 5
+      if (rating < 1 || rating > 5) {
+        return res
+          .status(400)
+          .json({ message: "Rating must be between 1 and 5" });
+      }
+
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });
