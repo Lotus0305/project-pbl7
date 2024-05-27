@@ -16,16 +16,16 @@ const authService = {
       password: hash,
       name: accountData.name,
       email: accountData.email,
-      role: roleCustomer,
+      role: roleCustomer._id, // Lưu trữ ID của vai trò
     });
     const accountRes = await Account.findById(account._id)
       .select("-password")
-      .populate("role", "_id name");
+      .populate("role", "_id name"); // Populate để lấy thông tin chi tiết của vai trò
     return accountRes;
   },
 
   login: async (username, password) => {
-    const account = await Account.findOne({ username });
+    const account = await Account.findOne({ username }).populate("role", "_id name"); // Populate để lấy thông tin chi tiết của vai trò
     if (!account) {
       throw new Error("Account not found");
     }
@@ -44,10 +44,17 @@ const authService = {
       throw new Error("Unauthorized");
     }
     return new Promise((resolve, reject) => {
-      jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, (err, account) => {
+      jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, async (err, decoded) => {
         if (err) {
           return reject(new Error("Forbidden"));
         }
+
+        // Truy xuất thông tin tài khoản từ ID và populate role
+        const account = await Account.findById(decoded.id).populate("role", "_id name");
+        if (!account) {
+          return reject(new Error("Account not found"));
+        }
+
         const accessToken = authService.generateAccessToken(account);
         const newRefreshToken = authService.generateRefreshToken(account);
         resolve({ accessToken, refreshToken: newRefreshToken });
@@ -58,7 +65,7 @@ const authService = {
   generateAccessToken: (account) => {
     return jwt.sign(
       {
-        id: account.id,
+        id: account._id, // Sử dụng _id thay vì id
         role: account.role.name,
       },
       process.env.JWT_ACCESS_KEY,
@@ -69,7 +76,7 @@ const authService = {
   generateRefreshToken: (account) => {
     return jwt.sign(
       {
-        id: account.id,
+        id: account._id, // Sử dụng _id thay vì id
         role: account.role.name,
       },
       process.env.JWT_REFRESH_KEY,
