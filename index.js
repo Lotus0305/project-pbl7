@@ -42,3 +42,13 @@ app.get("/", (req, res) => res.send("Express"));
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
+
+app.get('/proxy-image', (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) {
+      return res.status(400).send('URL is required');
+  }
+  request(imageUrl).pipe(res).on('error', () => {
+      res.status(500).send('Error fetching image');
+  });
+});

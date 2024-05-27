@@ -11,16 +11,16 @@ const novelSchema = new mongoose.Schema(
       type: String,
     },
     chapters: {
-      type: String,
+      type: Number,
     },
     views: {
-      type: String,
+      type: Number,
     },
     rating: {
-      type: String,
+      type: Number,
     },
     powerStone: {
-      type: String,
+      type: Number,
     },
     imageUrl: {
       type: String,
