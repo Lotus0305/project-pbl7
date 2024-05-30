@@ -39,16 +39,19 @@ app.use("/api/v1/import", importRouter);
 app.use("/api/v1/history", historyRouter);
 
 app.get("/", (req, res) => res.send("Hi"));
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
-});
 
-app.get('/proxy-image', (req, res) => {
+app.get("/proxy-image", (req, res) => {
   const imageUrl = req.query.url;
   if (!imageUrl) {
-      return res.status(400).send('URL is required');
+    return res.status(400).send("URL is required");
   }
-  request(imageUrl).pipe(res).on('error', () => {
-      res.status(500).send('Error fetching image');
-  });
+  request(imageUrl)
+    .pipe(res)
+    .on("error", () => {
+      res.status(500).send("Error fetching image");
+    });
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port: ${port}`);
 });
