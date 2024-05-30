@@ -38,7 +38,7 @@ app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/import", importRouter);
 app.use("/api/v1/history", historyRouter);
 
-app.get("/", (req, res) => res.send("Express"));
+app.get("/", (req, res) => res.send("Hi"));
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
