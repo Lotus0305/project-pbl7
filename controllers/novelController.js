@@ -70,31 +70,7 @@ const NovelController = {
     try {
       const { name, author, category } = req.body;
       const novelId = req.params.id;
-
-      // Check if name is already taken by another novel
-      if (name) {
-        const existingNovel = await Novel.findOne({ name });
-        if (existingNovel && existingNovel._id.toString() !== novelId) {
-          return res.status(400).json({ message: "Novel name already exists" });
-        }
-      }
-
-      // Check if author exists
-      if (author) {
-        const authorExists = await Author.findById(author);
-        if (!authorExists) {
-          return res.status(400).json({ message: "Author does not exist" });
-        }
-      }
-
-      // Check if category exists
-      if (category) {
-        const categoryExists = await Category.findById(category);
-        if (!categoryExists) {
-          return res.status(400).json({ message: "Category does not exist" });
-        }
-      }
-
+      await novelService.validateNovelData(name, author, category, novelId);
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });

@@ -1,14 +1,7 @@
 const Comment = require("../models/comment");
 
 const commentService = {
-  getComments: async (
-    page,
-    pageSize,
-    sortField,
-    sortOrder,
-    novelId,
-    accountId
-  ) => {
+  getComments: async (page, pageSize, sortField, sortOrder, novelId, accountId) => {
     const skip = (page - 1) * pageSize;
     const filterObject = {};
     if (novelId) {
@@ -69,6 +62,16 @@ const commentService = {
 
   deleteComment: async (id) => {
     return await Comment.findByIdAndDelete(id);
+  },
+
+  validateCommentData: async (content, rating) => {
+    if (!content || content.length < 1) {
+      throw new Error("Content cannot be empty");
+    }
+
+    if (rating < 1 || rating > 5) {
+      throw new Error("Rating must be between 1 and 5");
+    }
   },
 };
 

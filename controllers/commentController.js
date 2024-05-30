@@ -7,12 +7,16 @@ const commentController = {
       const pageSize = parseInt(req.query.pageSize) || 10;
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+      const novelId = req.query.novelId || null;
+      const accountId = req.query.accountId || null;
 
       const result = await commentService.getComments(
         page,
         pageSize,
         sortField,
-        sortOrder
+        sortOrder,
+        novelId,
+        accountId
       );
       res.json(result);
     } catch (error) {
@@ -66,19 +70,7 @@ const commentController = {
   validateCommentData: async (req, res, next) => {
     try {
       const { content, rating } = req.body;
-
-      // Check if content is not empty
-      if (!content || content.length < 1) {
-        return res.status(400).json({ message: "Content cannot be empty" });
-      }
-
-      // Check if rating is between 1 and 5
-      if (rating < 1 || rating > 5) {
-        return res
-          .status(400)
-          .json({ message: "Rating must be between 1 and 5" });
-      }
-
+      await commentService.validateCommentData(content, rating);
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });

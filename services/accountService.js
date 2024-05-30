@@ -115,6 +115,24 @@ const accountService = {
 
     return account.likedNovels;
   },
+
+  validateAccountData: async (accountId, { username, email }) => {
+    // Check if username is already taken by another account
+    if (username) {
+      const existingUsername = await Account.findOne({ username });
+      if (existingUsername && existingUsername._id.toString() !== accountId) {
+        throw new Error("Username already exists");
+      }
+    }
+
+    // Check if email is already taken by another account
+    if (email) {
+      const existingEmail = await Account.findOne({ email });
+      if (existingEmail && existingEmail._id.toString() !== accountId) {
+        throw new Error("Email already exists");
+      }
+    }
+  },
 };
 
 module.exports = accountService;

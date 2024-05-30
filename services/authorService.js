@@ -59,6 +59,16 @@ const authorService = {
   deleteAuthor: async (id) => {
     await Author.findByIdAndDelete(id);
   },
+
+  validateAuthorData: async (authorId, { name }) => {
+    // Check if name is already taken by another author
+    if (name) {
+      const existingAuthor = await Author.findOne({ name });
+      if (existingAuthor && existingAuthor._id.toString() !== authorId) {
+        throw new Error("Author name already exists");
+      }
+    }
+  },
 };
 
 module.exports = authorService;

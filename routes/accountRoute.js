@@ -13,6 +13,7 @@ router.post("/:accountId/unlike/:novelId", accountController.unlikeNovel);
 router.put(
   "/:id",
   accountController.validateAccountData,
+  accountController.protectAccountData,
   accountController.updateAccount
 );
 router.delete("/:id", accountController.deleteAccount);

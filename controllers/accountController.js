@@ -1,4 +1,5 @@
 const accountService = require("../services/accountService");
+const Account = require("../models/account");
 
 const accountController = {
   getAccounts: async (req, res) => {
@@ -91,6 +92,7 @@ const accountController = {
 
   validateAccountData: async (req, res, next) => {
     try {
+
       const { username, email } = req.body;
       const accountId = req.params.id;
 
@@ -109,11 +111,16 @@ const accountController = {
           return res.status(400).json({ message: "Email already exists" });
         }
       }
-
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
+  },
+
+  protectAccountData : async (req, res, next) => {
+    delete req.body.password;
+    delete req.body.role;
+    next();
   },
 };
 

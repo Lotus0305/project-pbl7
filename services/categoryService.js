@@ -5,7 +5,6 @@ const categoryService = {
     const skip = (page - 1) * pageSize;
 
     const categories = await Category.find();
-
     const nonEmptyCategories = categories.filter(
       (category) =>
         category[sortField] !== "" &&
@@ -26,10 +25,7 @@ const categoryService = {
     });
 
     const processedCategories = nonEmptyCategories.concat(emptyCategories);
-    const paginatedCategories = processedCategories.slice(
-      skip,
-      skip + pageSize
-    );
+    const paginatedCategories = processedCategories.slice(skip, skip + pageSize);
     const total = await Category.countDocuments();
 
     return {
@@ -61,6 +57,15 @@ const categoryService = {
 
   deleteCategory: async (id) => {
     await Category.findByIdAndDelete(id);
+  },
+
+  validateCategoryData: async (name, categoryId) => {
+    if (name) {
+      const existingCategory = await Category.findOne({ name });
+      if (existingCategory && existingCategory._id.toString() !== categoryId) {
+        throw new Error("Category name already exists");
+      }
+    }
   },
 };
 

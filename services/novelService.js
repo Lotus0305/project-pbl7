@@ -3,14 +3,7 @@ const Author = require("../models/author");
 const Category = require("../models/category");
 
 const novelService = {
-  getNovels: async (
-    page,
-    pageSize,
-    sortField,
-    sortOrder,
-    categoryId,
-    authorId
-  ) => {
+  getNovels: async (page, pageSize, sortField, sortOrder, categoryId, authorId) => {
     const skip = (page - 1) * pageSize;
     const filterObject = {};
     if (categoryId) {
@@ -38,15 +31,15 @@ const novelService = {
     );
 
     nonEmptyNovels.sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortOrder === -1 ? 1 : -1;
-      if (a[sortField] > b[sortField]) return sortOrder === -1 ? -1 : 1;
+      if (a[sortField] < b[sortField]) return sortOrder === "desc" ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === "desc" ? -1 : 1;
       return 0;
     });
 
     const processedNovels = nonEmptyNovels.concat(emptyNovels);
     const paginatedNovels = processedNovels.slice(skip, skip + pageSize);
     const total = await Novel.countDocuments(filterObject);
-    
+
     return {
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
@@ -88,6 +81,29 @@ const novelService = {
     }
 
     await Novel.findByIdAndDelete(id);
+  },
+
+  validateNovelData: async (name, author, category, novelId) => {
+    if (name) {
+      const existingNovel = await Novel.findOne({ name });
+      if (existingNovel && existingNovel._id.toString() !== novelId) {
+        throw new Error("Novel name already exists");
+      }
+    }
+
+    if (author) {
+      const authorExists = await Author.findById(author);
+      if (!authorExists) {
+        throw new Error("Author does not exist");
+      }
+    }
+
+    if (category) {
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        throw new Error("Category does not exist");
+      }
+    }
   },
 };
 

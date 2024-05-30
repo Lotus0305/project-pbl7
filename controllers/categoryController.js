@@ -74,20 +74,7 @@ const CategoryController = {
     try {
       const { name } = req.body;
       const categoryId = req.params.id;
-
-      // Check if name is already taken by another category
-      if (name) {
-        const existingCategory = await Category.findOne({ name });
-        if (
-          existingCategory &&
-          existingCategory._id.toString() !== categoryId
-        ) {
-          return res
-            .status(400)
-            .json({ message: "Category name already exists" });
-        }
-      }
-
+      await categoryService.validateCategoryData(name, categoryId);
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });

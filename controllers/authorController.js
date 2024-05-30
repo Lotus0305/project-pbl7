@@ -1,6 +1,6 @@
 const authorService = require("../services/authorService");
 
-const AuthorController = {
+const authorController = {
   getAuthors: async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -64,27 +64,18 @@ const AuthorController = {
         return res.status(404).json({ message: "Author not found" });
       }
       await authorService.deleteAuthor(req.params.id);
-      res.status(200).json({ message: "Author has been deleted" });
+      res.status(202).json({ message: "Author has been deleted" });
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
   },
-  
+
   validateAuthorData: async (req, res, next) => {
     try {
       const { name } = req.body;
       const authorId = req.params.id;
 
-      // Check if name is already taken by another author
-      if (name) {
-        const existingAuthor = await Author.findOne({ name });
-        if (existingAuthor && existingAuthor._id.toString() !== authorId) {
-          return res
-            .status(400)
-            .json({ message: "Author name already exists" });
-        }
-      }
-
+      await authorService.validateAuthorData(authorId, { name });
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });
@@ -92,4 +83,4 @@ const AuthorController = {
   },
 };
 
-module.exports = AuthorController;
+module.exports = authorController;

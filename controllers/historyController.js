@@ -67,14 +67,7 @@ const HistoryController = {
   validateHistoryData: async (req, res, next) => {
     try {
       const { lastReadChapter } = req.body;
-
-      // Check if lastReadChapter is a positive number
-      if (lastReadChapter < 1) {
-        return res
-          .status(400)
-          .json({ message: "Last read chapter must be at least 1" });
-      }
-
+      await historyService.validateHistoryData(lastReadChapter);
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });
