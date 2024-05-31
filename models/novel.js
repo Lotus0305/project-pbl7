@@ -50,4 +50,17 @@ novelSchema.pre("save", async function (next) {
   next();
 });
 
+novelSchema.methods.updateRating = async function () {
+  const Comment = mongoose.model("Comment");
+  const result = await Comment.aggregate([
+    { $match: { novel: this._id } },
+    { $group: { _id: null, avgRating: { $avg: "$rating" } } }
+  ]);
+
+  if (result.length > 0) {
+    this.rating = result[0].avgRating;
+    await this.save();
+  }
+};
+
 module.exports = mongoose.model("Novel", novelSchema);

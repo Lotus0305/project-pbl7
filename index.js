@@ -29,14 +29,9 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(cors());
 app.use(morgan("common"));
 
-app.use("/api/v1/author", authorRouter);
-app.use("/api/v1/category", categoryRouter);
-app.use("/api/v1/novel", novelRouter);
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/account", accountRouter);
-app.use("/api/v1/comment", commentRouter);
-app.use("/api/v1/import", importRouter);
-app.use("/api/v1/history", historyRouter);
+app.listen(port, () => {
+  console.log(`Server is running on port: ${port}`);
+});
 
 app.get("/", (req, res) => res.send("Hi"));
 
@@ -52,6 +47,16 @@ app.get("/proxy-image", (req, res) => {
     });
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
-});
+app.use("/api/v1/author", authorRouter);
+app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/novel", novelRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/account", accountRouter);
+app.use("/api/v1/comment", commentRouter);
+app.use("/api/v1/import", importRouter);
+app.use("/api/v1/history", historyRouter);
+
+
+
+
+

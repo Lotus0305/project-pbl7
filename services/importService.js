@@ -38,15 +38,15 @@ const importService = {
     return importedCount;
   },
 
-  importNovel: async () => {
+  importNovel : async () => {
     const novels = await csvtojson().fromFile("novel.csv");
-
+  
     let importedCount = 0;
-
+  
     for (const nov of novels) {
       let category = null;
       let author = null;
-
+  
       if (nov.categoryName && nov.categoryName.trim()) {
         const categoryName = nov.categoryName.toLowerCase().trim();
         category = await Category.findOne({ name: categoryName });
@@ -55,7 +55,7 @@ const importService = {
           await category.save();
         }
       }
-
+  
       if (nov.authorName && nov.authorName.trim()) {
         const authorName = nov.authorName.toLowerCase().trim();
         author = await Author.findOne({ name: authorName });
@@ -64,20 +64,19 @@ const importService = {
           await author.save();
         }
       }
-
+  
       const novelData = {
         _id: nov.novelId,
         name: nov.name,
         description: nov.description,
-        chapters: nov.chapters,
-        views: nov.views,
-        rating: nov.rating,
-        powerStone: nov.powerStone,
+        chapters: parseInt(nov.chapters, 10),
+        views: parseInt(nov.views, 10),
+        powerStone: parseInt(nov.powerStone.replace(/,/g, ''), 10),
         imageUrl: nov.imageUrl,
         author: author ? author._id : null,
         category: category ? category._id : null,
       };
-
+  
       await Novel.findOneAndUpdate({ _id: nov.novelId }, novelData, {
         new: true,
         upsert: true,
@@ -85,29 +84,27 @@ const importService = {
       });
       importedCount++;
     }
-
+  
     return importedCount;
   },
 
   importComment: async () => {
     const comments = await csvtojson().fromFile("comment.csv");
-
     let importedCount = 0;
-
     await Promise.all(
       comments.map(async (com) => {
-        if (!com.novelId || !com.accountID) {
+        if (!com.novelId || !com.accountId) {
           return;
         }
         const commentData = {
-          _id: com._id,
+          _id: com.commentId,
           content: com.content,
           novel: com.novelId,
           account: com.accountID,
           rating: com.rating,
         };
 
-        await Comment.findOneAndUpdate({ _id: com._id }, commentData, {
+        await Comment.findOneAndUpdate({ _id: com.commentId }, commentData, {
           new: true,
           upsert: true,
           setDefaultsOnInsert: true,
