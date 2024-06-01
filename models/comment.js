@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Novel = require("./novel");
 
 const commentSchema = new mongoose.Schema(
   {
@@ -13,11 +12,13 @@ const commentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.String,
       ref: "Novel",
       required: true,
+      index: true
     },
     account: {
       type: mongoose.Schema.Types.String,
       ref: "Account",
       required: true,
+      index: true
     },
     rating: {
       type: mongoose.Schema.Types.Number,
@@ -32,25 +33,26 @@ const commentSchema = new mongoose.Schema(
   }
 );
 
-const updateAverageRating = async (novelId) => {
-  try {
-    const comments = await mongoose.model("Comment").find({ novel: novelId });
-    if (comments.length === 0) return 0;
-    const totalRating = comments.reduce((acc, comment) => acc + comment.rating, 0);
-    const averageRating = totalRating / comments.length;
-    await Novel.findByIdAndUpdate(novelId, { averageRating });
-    return averageRating;
-  } catch (error) {
-    throw error;
-  }
-};
-
 commentSchema.post("save", async function () {
-  await updateAverageRating(this.novel);
+  const Novel = mongoose.model("Novel");
+  const novel = await Novel.findById(this.novel);
+  if (novel) {
+    novel.totalRating += this.rating;
+    novel.ratingCount += 1;
+    novel.averageRating = novel.totalRating / novel.ratingCount;
+    await novel.save();
+  }
 });
 
 commentSchema.post("remove", async function () {
-  await updateAverageRating(this.novel);
+  const Novel = mongoose.model("Novel");
+  const novel = await Novel.findById(this.novel);
+  if (novel) {
+    novel.totalRating -= this.rating;
+    novel.ratingCount -= 1;
+    novel.averageRating = novel.ratingCount > 0 ? novel.totalRating / novel.ratingCount : 0;
+    await novel.save();
+  }
 });
 
 module.exports = mongoose.model("Comment", commentSchema);

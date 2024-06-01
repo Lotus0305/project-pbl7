@@ -25,11 +25,13 @@ const accountSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.String,
       ref: "Role",
       required: true,
+      index: true
     },
     likedNovels: [
       {
         type: mongoose.Schema.Types.String,
         ref: "Novel",
+        index: true
       },
     ],
   },

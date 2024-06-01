@@ -25,10 +25,20 @@ const novelSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.String,
       ref: "Author",
+      index: true
     },
     category: {
       type: mongoose.Schema.Types.String,
       ref: "Category",
+      index: true
+    },
+    totalRating: {
+      type: Number,
+      default: 0,
+    },
+    ratingCount: {
+      type: Number,
+      default: 0,
     },
     averageRating: {
       type: Number,

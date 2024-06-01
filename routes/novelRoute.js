@@ -11,4 +11,6 @@ router.put(
 );
 router.delete("/:id", novelController.deleteNovel);
 
+// router.post("/recommend", novelController.getRecommendations);
+
 module.exports = router;

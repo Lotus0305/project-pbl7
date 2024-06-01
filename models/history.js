@@ -7,11 +7,13 @@ const historySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.String,
       ref: "Account",
       required: true,
+      index: true
     },
     novel: {
       type: mongoose.Schema.Types.String,
       ref: "Novel",
       required: true,
+      index: true
     },
     lastReadChapter: {
       type: Number,
