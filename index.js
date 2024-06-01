@@ -5,7 +5,6 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const request = require('request');
 
-
 const authorRouter = require("./routes/authorRoute");
 const categoryRouter = require("./routes/categoryRoute");
 const novelRouter = require("./routes/novelRoute");
@@ -14,6 +13,8 @@ const accountRouter = require("./routes/accountRoute");
 const commentRouter = require("./routes/commentRoute");
 const importRouter = require("./routes/importRoute");
 const historyRouter = require("./routes/historyRoute");
+const Novel = require("./models/novel"); // Import model Novel
+const Comment = require("./models/comment"); // Import model Comment
 var bodyParser = require("body-parser");
 
 dotenv.config();
@@ -25,6 +26,8 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", function () {
   console.log("Connected to MongoDB");
+  // Calculate average ratings after database connection is established
+  // calculateAllAverageRatings();
 });
 
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -57,3 +60,23 @@ app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/import", importRouter);
 app.use("/api/v1/history", historyRouter);
+
+// // Function to calculate average ratings for all novels
+// const calculateAllAverageRatings = async () => {
+//   try {
+//     const novels = await Novel.find({});
+//     for (const novel of novels) {
+//       const comments = await Comment.find({ novel: novel._id });
+//       if (comments.length > 0) {
+//         const totalRating = comments.reduce((acc, comment) => acc + comment.rating, 0);
+//         const averageRating = totalRating / comments.length;
+//         await Novel.findByIdAndUpdate(novel._id, { averageRating });
+//       } else {
+//         await Novel.findByIdAndUpdate(novel._id, { averageRating: 0 });
+//       }
+//     }
+//     console.log("Average ratings updated for all novels");
+//   } catch (error) {
+//     console.error("Error calculating average ratings:", error);
+//   }
+// };

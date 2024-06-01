@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Novel = require("./novel");
 
 const commentSchema = new mongoose.Schema(
   {
@@ -6,6 +7,7 @@ const commentSchema = new mongoose.Schema(
     content: {
       type: String,
       required: true,
+      min: 1,
     },
     novel: {
       type: mongoose.Schema.Types.String,
@@ -17,11 +19,6 @@ const commentSchema = new mongoose.Schema(
       ref: "Account",
       required: true,
     },
-    content: {
-      type: String,
-      required: true,
-      min : 1,
-    },
     rating: {
       type: mongoose.Schema.Types.Number,
       required: true,
@@ -29,20 +26,31 @@ const commentSchema = new mongoose.Schema(
       max: 5,
     },
   },
-  { timestamps: true },
-  { strict: true }
+  {
+    timestamps: true,
+    strict: true,
+  }
 );
 
-commentSchema.pre("save", async function (next) {
-  if (this.isNew) {
-    if (!this._id) {
-      const timestamp = Date.now().toString();
-      const randomNum = Math.floor(Math.random() * 10000).toString();
-      const id = timestamp + randomNum;
-      this._id = "0" + id.toString();
-    }
+const updateAverageRating = async (novelId) => {
+  try {
+    const comments = await mongoose.model("Comment").find({ novel: novelId });
+    if (comments.length === 0) return 0;
+    const totalRating = comments.reduce((acc, comment) => acc + comment.rating, 0);
+    const averageRating = totalRating / comments.length;
+    await Novel.findByIdAndUpdate(novelId, { averageRating });
+    return averageRating;
+  } catch (error) {
+    throw error;
   }
-  next();
+};
+
+commentSchema.post("save", async function () {
+  await updateAverageRating(this.novel);
+});
+
+commentSchema.post("remove", async function () {
+  await updateAverageRating(this.novel);
 });
 
 module.exports = mongoose.model("Comment", commentSchema);
