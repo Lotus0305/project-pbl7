@@ -10,7 +10,7 @@ const bcrypt = require("bcryptjs");
 
 const importService = {
   importAccount: async () => {
-    const accounts = await csvtojson().fromFile("account.csv");
+    const accounts = await csvtojson().fromFile("data/account.csv");
     const roleCustomer = await Role.findOne({ name: "customer" });
 
     let importedCount = 0;
@@ -39,7 +39,7 @@ const importService = {
   },
 
   importNovel: async () => {
-    const novels = await csvtojson().fromFile("novel.csv");
+    const novels = await csvtojson().fromFile("data/novel.csv");
 
     let importedCount = 0;
 
@@ -101,7 +101,7 @@ const importService = {
   },
 
   importComment: async () => {
-    const comments = await csvtojson().fromFile("comment.csv");
+    const comments = await csvtojson().fromFile("data/comment.csv");
     let importedCount = 0;
 
     await Promise.all(

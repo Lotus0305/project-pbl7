@@ -76,6 +76,22 @@ const NovelController = {
       res.status(400).json({ message: error.message });
     }
   },
+
+  getRecommendations: async (req, res) => {
+    try {
+      const accountId = req.query.accountId;
+      if (!accountId) {
+        return res.status(400).json({
+          success: false,
+          error: "accountId is required",
+        });
+      }
+      const recommendations = await novelService.getRecommendations(accountId);
+      res.json({ success: true, data: recommendations });
+    } catch (error) {
+      res.status(400).json({ message: error.toString()});
+    }
+  },
 };
 
 module.exports = NovelController;
