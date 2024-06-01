@@ -52,6 +52,12 @@ const commentService = {
   },
 
   addComment: async (commentData) => {
+    const { account, novel } = commentData;
+
+    const existingComment = await Comment.findOne({ account, novel });
+    if (existingComment) {
+      throw new Error("Comment already exists for this account and novel");
+    }
     const comment = new Comment(commentData);
     return await comment.save();
   },
