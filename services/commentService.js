@@ -56,7 +56,7 @@ const commentService = {
 
     const existingComment = await Comment.findOne({ account, novel });
     if (existingComment) {
-      throw new Error("Comment already exists for this account and novel");
+      throw new Error("This account has already commented on this novel");
     }
     const comment = new Comment(commentData);
     return await comment.save();
