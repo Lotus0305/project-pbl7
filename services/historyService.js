@@ -45,13 +45,21 @@ const historyService = {
   },
 
   addHistory: async (historyData) => {
-    const { account, novel } = historyData;
+    const { account, novel, lastReadChapter, lastReadDate } = historyData;
 
     const accountExists = await Account.findById(account);
     const novelExists = await Novel.findById(novel);
 
     if (!accountExists || !novelExists) {
       throw new Error("Account or Novel not found");
+    }
+
+    const existingHistory = await History.findOne({ account, novel });
+    if (existingHistory) {
+      existingHistory.lastReadChapter = lastReadChapter;
+      existingHistory.lastReadDate = lastReadDate || Date.now();
+      const updatedHistory = await existingHistory.save();
+      return updatedHistory;
     }
 
     const history = new History(historyData);
