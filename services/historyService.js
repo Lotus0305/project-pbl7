@@ -87,6 +87,11 @@ const historyService = {
     await History.findByIdAndDelete(id);
   },
 
+  deleteHistoriesByAccount: async (accountId) => {
+    const result = await History.deleteMany({ account: accountId });
+    return result.deletedCount;
+  },
+
   validateHistoryData: async (lastReadChapter) => {
     if (lastReadChapter < 1) {
       throw new Error("Last read chapter must be at least 1");

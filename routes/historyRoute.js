@@ -14,5 +14,7 @@ router.put(
   historyController.updateHistory
 );
 router.delete("/:id", historyController.deleteHistory);
+router.delete("/account/:id", historyController.deleteHistoriesByAccount);
+
 
 module.exports = router;

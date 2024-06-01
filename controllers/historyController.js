@@ -63,6 +63,15 @@ const HistoryController = {
       res.status(400).json({ message: err.message });
     }
   },
+  deleteHistoriesByAccount: async (req, res) => {
+    try {
+      const accountId = req.params.id;
+      const deletedCount = await historyService.deleteHistoriesByAccount(accountId);
+      res.status(200).json({ message: `All ${deletedCount} histories deleted for account ${accountId}` });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
 
   validateHistoryData: async (req, res, next) => {
     try {
