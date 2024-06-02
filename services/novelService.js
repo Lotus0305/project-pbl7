@@ -131,7 +131,7 @@ const novelService = {
   getRecommendations: async (accountId) => {
     return new Promise((resolve, reject) => {
       console.log(accountId);
-      const process = spawn("python", ["data/recommend.py", accountId]);
+      const process = spawn('python', [__dirname +'/recommend.py', accountId]);
       let dataToSend = "";
       process.stdout.on("data", (data) => {
         dataToSend += data.toString();
