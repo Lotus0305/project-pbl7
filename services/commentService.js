@@ -29,8 +29,8 @@ const commentService = {
     );
 
     nonEmptyComments.sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortOrder === "desc" ? 1 : -1;
-      if (a[sortField] > b[sortField]) return sortOrder === "desc" ? -1 : 1;
+      if (a[sortField] < b[sortField]) return sortOrder === -1 ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === -1 ? -1 : 1;
       return 0;
     });
 
