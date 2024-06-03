@@ -61,6 +61,15 @@ const NovelController = {
     }
   },
 
+  updateRatings: async (req, res) => {
+    try {
+      const novels = await novelService.updateRatings();
+      res.status(200).json({ message: "Ratings updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   deleteNovel: async (req, res) => {
     try {
       await novelService.deleteNovel(req.params.id);
@@ -78,22 +87,6 @@ const NovelController = {
       next();
     } catch (error) {
       res.status(400).json({ message: error.message });
-    }
-  },
-
-  getRecommendations: async (req, res) => {
-    try {
-      const accountId = req.query.accountId;
-      if (!accountId) {
-        return res.status(400).json({
-          success: false,
-          error: "accountId is required",
-        });
-      }
-      const recommendations = await novelService.getRecommendations(accountId);
-      res.json({ success: true, data: recommendations });
-    } catch (error) {
-      res.status(400).json({ message: error.toString() });
     }
   },
 };

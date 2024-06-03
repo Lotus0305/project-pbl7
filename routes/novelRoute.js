@@ -3,7 +3,7 @@ const router = express.Router();
 const novelController = require('../controllers/novelController');
 
 router.get("/", novelController.getNovels);
-router.get("/recommend", novelController.getRecommendations);
+router.get("/update-ratings", novelController.updateRatings);
 router.get("/:id", novelController.getNovel);
 router.post("/", novelController.validateNovelData, novelController.addNovel);
 router.put("/:id", novelController.validateNovelData, novelController.updateNovel);

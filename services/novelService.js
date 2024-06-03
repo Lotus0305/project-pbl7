@@ -1,7 +1,7 @@
 const Novel = require("../models/novel");
 const Author = require("../models/author");
 const Category = require("../models/category");
-const { spawn } = require("child_process");
+const Comment = require("../models/comment");
 
 const novelService = {
   getNovels: async (
@@ -104,6 +104,25 @@ const novelService = {
     return updatedNovel;
   },
 
+  updateRatings: async () => {
+    const novels = await Novel.find();
+    for (const novel of novels) {
+      const comments = await Comment.find({ novel: novel._id });
+      let totalRating = 0;
+      let ratingCount = 0;
+
+      comments.forEach((comment) => {
+        totalRating += comment.rating;
+        ratingCount += 1;
+      });
+
+      novel.totalRating = totalRating;
+      novel.ratingCount = ratingCount;
+      novel.averageRating = ratingCount > 0 ? totalRating / ratingCount : 0;
+      await novel.save();
+    }
+  },
+
   // Delete a novel by ID
   deleteNovel: async (id) => {
     const novel = await Novel.findById(id);
@@ -137,34 +156,6 @@ const novelService = {
         throw new Error("Category does not exist");
       }
     }
-  },
-
-  getRecommendations: async (accountId) => {
-    return new Promise((resolve, reject) => {
-      console.log(accountId);
-      const process = spawn("python", [__dirname + "/recommend.py", accountId]);
-      let dataToSend = "";
-      process.stdout.on("data", (data) => {
-        dataToSend += data.toString();
-      });
-
-      process.stderr.on("data", (data) => {
-        console.error(`stderr: ${data.toString("utf8")}`);
-      });
-
-      process.on("close", (code) => {
-        if (code === 0) {
-          const matches = dataToSend.match(/\[.*\]/);
-          if (matches) {
-            resolve(JSON.parse(matches[0]));
-          } else {
-            reject(new Error("Failed to extract recommendations."));
-          }
-        } else {
-          reject(new Error(`Python script exited with code ${code}`));
-        }
-      });
-    });
   },
 };
 
