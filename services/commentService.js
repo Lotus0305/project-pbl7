@@ -1,4 +1,5 @@
 const Comment = require("../models/comment");
+const Novel = require("../models/novel");
 
 const commentService = {
   getComments: async (page, pageSize, sortField, sortOrder, novelId, accountId) => {
@@ -54,10 +55,14 @@ const commentService = {
 
   addComment: async (commentData) => {
     const { account, novel } = commentData;
-
     const existingComment = await Comment.findOne({ account, novel });
+
     if (existingComment) {
       throw new Error("This account has already commented on this novel");
+    }
+    const existingNovel = await Novel.findOne({ _id: novel });
+    if (!existingNovel) {
+      throw new Error("The novel does not exist");
     }
     const comment = new Comment(commentData);
     return await comment.save();
