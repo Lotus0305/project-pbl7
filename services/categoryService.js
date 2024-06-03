@@ -1,10 +1,22 @@
 const Category = require("../models/category");
 
 const categoryService = {
-  getCategories: async (page, pageSize, sortField, sortOrder) => {
+  getCategories: async (page, pageSize, sortField, sortOrder, search, ids) => {
     const skip = (page - 1) * pageSize;
+    const filterObject = {};
 
-    const categories = await Category.find();
+    if (search) {
+      filterObject.$or = [
+        { name: { $regex: search, $options: "i" } }, // case-insensitive search by name
+        { _id: search }, // exact match search by _id
+      ];
+    }
+    if (ids) {
+      filterObject._id = { $in: ids };
+    }
+
+    const categories = await Category.find(filterObject);
+
     const nonEmptyCategories = categories.filter(
       (category) =>
         category[sortField] !== "" &&
@@ -25,10 +37,14 @@ const categoryService = {
     });
 
     const processedCategories = nonEmptyCategories.concat(emptyCategories);
-    const paginatedCategories = processedCategories.slice(skip, skip + pageSize);
-    const total = await Category.countDocuments();
+    const paginatedCategories = processedCategories.slice(
+      skip,
+      skip + pageSize
+    );
+    const total = await Category.countDocuments(filterObject);
 
     return {
+      total: total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
       categories: paginatedCategories,

@@ -7,12 +7,16 @@ const authorController = {
       const pageSize = parseInt(req.query.pageSize) || 10;
       const sortField = req.query.sortField || null;
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+      const search = req.query.search || null;
+      const ids = req.query.ids ? req.query.ids.split(",") : null; // assuming ids are passed as a comma-separated string
 
       const result = await authorService.getAuthors(
         page,
         pageSize,
         sortField,
-        sortOrder
+        sortOrder,
+        search,
+        ids
       );
       res.json(result);
     } catch (err) {

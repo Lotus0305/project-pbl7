@@ -4,14 +4,15 @@ const Category = require("../models/category");
 const { spawn } = require("child_process");
 
 const novelService = {
-  // Fetch novels with pagination, filtering, and sorting
   getNovels: async (
     page,
     pageSize,
     sortField,
     sortOrder,
     categoryId,
-    authorId
+    authorId,
+    search,
+    ids
   ) => {
     const skip = (page - 1) * pageSize;
     const filterObject = {};
@@ -21,6 +22,15 @@ const novelService = {
     }
     if (authorId) {
       filterObject.author = authorId;
+    }
+    if (search) {
+      filterObject.$or = [
+        { name: { $regex: search, $options: 'i' } }, // case-insensitive search by name
+        { _id: search } // exact match search by _id
+      ];
+    }
+    if (ids) {
+      filterObject._id = { $in: ids };
     }
 
     const novels = await Novel.find(filterObject)
@@ -51,6 +61,7 @@ const novelService = {
     const total = await Novel.countDocuments(filterObject);
 
     return {
+      total: total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
       novels: paginatedNovels,
@@ -131,7 +142,7 @@ const novelService = {
   getRecommendations: async (accountId) => {
     return new Promise((resolve, reject) => {
       console.log(accountId);
-      const process = spawn('python', [__dirname +'/recommend.py', accountId]);
+      const process = spawn("python", [__dirname + "/recommend.py", accountId]);
       let dataToSend = "";
       process.stdout.on("data", (data) => {
         dataToSend += data.toString();

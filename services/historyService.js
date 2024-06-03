@@ -21,6 +21,7 @@ const historyService = {
     const total = await History.countDocuments(filterObject);
 
     return {
+      total: total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
       histories: histories,

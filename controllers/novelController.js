@@ -9,6 +9,8 @@ const NovelController = {
       const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
       const categoryId = req.query.categoryId || null;
       const authorId = req.query.authorId || null;
+      const search = req.query.search || null;
+      const ids = req.query.ids ? req.query.ids.split(",") : null; // assuming ids are passed as a comma-separated string
 
       const result = await novelService.getNovels(
         page,
@@ -16,7 +18,9 @@ const NovelController = {
         sortField,
         sortOrder,
         categoryId,
-        authorId
+        authorId,
+        search,
+        ids
       );
       res.json(result);
     } catch (err) {
@@ -89,7 +93,7 @@ const NovelController = {
       const recommendations = await novelService.getRecommendations(accountId);
       res.json({ success: true, data: recommendations });
     } catch (error) {
-      res.status(400).json({ message: error.toString()});
+      res.status(400).json({ message: error.toString() });
     }
   },
 };

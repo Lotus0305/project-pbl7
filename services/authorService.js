@@ -1,10 +1,21 @@
 const Author = require("../models/author");
 
 const authorService = {
-  getAuthors: async (page, pageSize, sortField, sortOrder) => {
+  getAuthors: async (page, pageSize, sortField, sortOrder, search, ids) => {
     const skip = (page - 1) * pageSize;
+    const filterObject = {};
 
-    const authors = await Author.find();
+    if (search) {
+      filterObject.$or = [
+        { name: { $regex: search, $options: "i" } }, // case-insensitive search by name
+        { _id: search }, // exact match search by _id
+      ];
+    }
+    if (ids) {
+      filterObject._id = { $in: ids };
+    }
+
+    const authors = await Author.find(filterObject);
 
     const nonEmptyAuthors = authors.filter(
       (author) =>
@@ -27,9 +38,10 @@ const authorService = {
 
     const processedAuthors = nonEmptyAuthors.concat(emptyAuthors);
     const paginatedAuthors = processedAuthors.slice(skip, skip + pageSize);
-    const total = await Author.countDocuments();
+    const total = await Author.countDocuments(filterObject);
 
     return {
+      total: total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
       authors: paginatedAuthors,

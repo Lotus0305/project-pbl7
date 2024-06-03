@@ -4,10 +4,22 @@ const Novel = require("../models/novel");
 const bcrypt = require("bcryptjs");
 
 const accountService = {
-  getAccounts: async (page, pageSize, sortField, sortOrder) => {
+  getAccounts: async (page, pageSize, sortField, sortOrder, search, ids) => {
     const skip = (page - 1) * pageSize;
+    const filterObject = {};
 
-    const accounts = await Account.find()
+    if (search) {
+      filterObject.$or = [
+        { name: { $regex: search, $options: "i" } }, // case-insensitive search by username
+        { username: { $regex: search, $options: "i" } }, // case-insensitive search by username
+        { email: { $regex: search, $options: "i" } }, // case-insensitive search by email
+      ];
+    }
+    if (ids) {
+      filterObject._id = { $in: ids };
+    }
+
+    const accounts = await Account.find(filterObject)
       .select("-password")
       .populate("role", "_id name");
 
@@ -25,16 +37,17 @@ const accountService = {
     );
 
     nonEmptyAccounts.sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortOrder === -1 ? 1 : -1;
-      if (a[sortField] > b[sortField]) return sortOrder === -1 ? -1 : 1;
+      if (a[sortField] < b[sortField]) return sortOrder === "desc" ? 1 : -1;
+      if (a[sortField] > b[sortField]) return sortOrder === "desc" ? -1 : 1;
       return 0;
     });
 
     const processedAccounts = nonEmptyAccounts.concat(emptyAccounts);
     const paginatedAccounts = processedAccounts.slice(skip, skip + pageSize);
-    const total = await Account.countDocuments();
+    const total = await Account.countDocuments(filterObject);
 
     return {
+      total: total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
       accounts: paginatedAccounts,

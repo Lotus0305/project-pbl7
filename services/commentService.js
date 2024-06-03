@@ -39,6 +39,7 @@ const commentService = {
     const total = await Comment.countDocuments(filterObject);
 
     return {
+      total: total,
       totalPages: Math.ceil(total / pageSize),
       currentPage: page,
       comments: paginatedComments,
