@@ -1,15 +1,1 @@
-hYm142Jn4lXrC80r
-run : npm run start
 
-
-- find, findById, findByIdAndUpdate, findByIdAndDelete
-- updateOne, updateMany
-
-$set: Đặt giá trị của một trường trong tài liệu. Nếu trường không tồn tại, $set sẽ tạo nó.
-await Model.updateOne({ _id: id }, { $set: { field: value } });
-
-$unset: Xóa một trường khỏi tài liệu.
-$push: Thêm một giá trị vào một mảng.
-$inc: Tăng giá trị của một trường số.
-$addToSet: Thêm một giá trị vào một mảng, nhưng chỉ khi giá trị đó chưa tồn tại trong mảng.
-$rename: Đổi tên một trường.
